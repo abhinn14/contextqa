@@ -20,4 +20,4 @@
 2. Create venv: `uv venv && .venv\Scripts\activate`
 3. Install deps: `uv pip install -r requirements.txt`
 4. Run backend server `uvicorn main:app --reload`
-- Default URL: http://127.0.0.1:8000
+- Default URL: http://localhost:8000
