@@ -19,5 +19,5 @@
 1. `cd rag-2`
 2. Create venv: `uv venv && .venv\Scripts\activate`
 3. Install deps: `uv pip install -r requirements.txt`
-4. Run backend server `uvicorn main:app --reload`
+4. Run backend server `uvicorn main:app --reload --host 0.0.0.0 --port 8000`
 - Default URL: http://localhost:8000
