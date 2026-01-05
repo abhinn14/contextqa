@@ -19,7 +19,7 @@ from chat.logger import GLOBAL_LOGGER as log
 
 
 # FastAPI initialization
-app = FastAPI(title="MultiDocChat", version="0.1.0")
+app = FastAPI(title="ContextQA", version="0.1.0")
 
 # CORS
 app.add_middleware(
