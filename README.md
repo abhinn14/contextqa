@@ -1,6 +1,6 @@
 # ContextRAG
 ## Demo
-<img align="left" src="assets/contextqa.gif" width="700" /> </br>
+<img align="left" src="assets/contextqa.gif" width="700" /> <br/>
 
 ## Details
 - Built a session-based conversational RAG system using FastAPI, FAISS, and LangChain, enabling isolated document ingestion and querying per session.
