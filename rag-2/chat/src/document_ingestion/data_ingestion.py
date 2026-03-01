@@ -106,7 +106,6 @@ class ChatIngestor:
             search_kwargs = {"k": k}
             
             if search_type == "mmr":
-                # MMR needs fetch_k (docs to fetch) and lambda_mult (diversity parameter)
                 search_kwargs["fetch_k"] = fetch_k
                 search_kwargs["lambda_mult"] = lambda_mult
                 log.info("Using MMR search", k=k, fetch_k=fetch_k, lambda_mult=lambda_mult)

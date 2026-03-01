@@ -3,8 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
@@ -15,7 +14,6 @@ from chat.src.document_chat.retrieval import ConversationalRAG
 from langchain_core.messages import HumanMessage, AIMessage
 from chat.exception.exception_handler import DocumentPortalException
 from chat.utils.session_cleanup import cleanup_stale_sessions, touch_session_meta
-from chat.logger import GLOBAL_LOGGER as log
 
 
 # FastAPI initialization
@@ -97,7 +95,7 @@ async def upload(files: List[UploadFile] = File(...)) -> UploadResponse:
         ingestor = ChatIngestor(use_session_dirs=True)
         session_id = ingestor.session_id
 
-        # Save, load, split, embed, and write FAISS index with MMR
+        # Save, split, embed, and write FAISS index with MMR
         ingestor.built_retriver(
             uploaded_files=wrapped_files,
             search_type="mmr",
@@ -171,4 +169,4 @@ async def chat(req: ChatRequest) -> ChatResponse:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8001")), reload=True)

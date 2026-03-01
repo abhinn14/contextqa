@@ -50,8 +50,6 @@ class ConversationalRAG:
             log.error("Failed to initialize ConversationalRAG", error=str(e))
             raise DocumentPortalException("Initialization error in ConversationalRAG", sys)
 
-    # ---------- Public API ----------
-
     def load_retriever_from_faiss(
         self,
         index_path: str,
@@ -146,7 +144,6 @@ class ConversationalRAG:
             log.error("Failed to invoke ConversationalRAG", error=str(e))
             raise DocumentPortalException("Invocation error in ConversationalRAG", sys)
 
-    # ---------- Internals ----------
 
     def _load_llm(self):
         try:
@@ -168,7 +165,7 @@ class ConversationalRAG:
             if self.retriever is None:
                 raise DocumentPortalException("No retriever set before building chain", sys)
 
-            # 1) Rewrite user question with chat history context
+            # Rewrite user question with chat history context
             question_rewriter = (
                 {"input": itemgetter("input"), "chat_history": itemgetter("chat_history")}
                 | self.contextualize_prompt
@@ -176,10 +173,10 @@ class ConversationalRAG:
                 | StrOutputParser()
             )
 
-            # 2) Retrieve docs for rewritten question
+            # Retrieve docs for rewritten question
             retrieve_docs = question_rewriter | self.retriever | self._format_docs
 
-            # 3) Answer using retrieved context + original input + chat history
+            # Answer using retrieved context + original input + chat history
             self.chain = (
                 {
                     "context": retrieve_docs,

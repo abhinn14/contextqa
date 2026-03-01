@@ -3,6 +3,7 @@ import sys
 import json
 from dotenv import load_dotenv
 from chat.utils.config_loader import load_config
+from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from chat.logger import GLOBAL_LOGGER as log
@@ -26,14 +27,18 @@ class ApiKeyManager:
 
 
 
-        for key in ["GROQ_API_KEY"]:
+        # Load API keys for different providers
+        for key in ["GROQ_API_KEY", "VLLM_API_KEY"]:
             if not self.api_keys.get(key):
                 env_val = os.getenv(key)
                 if env_val:
                     self.api_keys[key] = env_val
                     log.info(f"Loaded {key} from individual env var")
 
-        log.info("API keys loaded", keys={k: v[:6] + "..." for k, v in self.api_keys.items()})
+        if self.api_keys:
+            log.info("API keys loaded", keys={k: v[:6] + "..." for k, v in self.api_keys.items()})
+        else:
+            log.info("No API keys configured")
 
 
     def get(self, key: str) -> str:
@@ -79,13 +84,17 @@ class ModelLoader:
     def load_llm(self):
         """
         Load and return the configured LLM model.
+        Supports both Groq (for local dev) and vLLM (for RunPod production).
+        Set LLM_PROVIDER env var to switch: "groq" or "vllm"
         """
         llm_block = self.config["llm"]
-        provider_key = "groq"
-
+        
+        # Get provider from env var, default to "groq" for local development
+        provider_key = os.getenv("LLM_PROVIDER", "groq").lower()
+        
         if provider_key not in llm_block:
             log.error("LLM provider not found in config", provider=provider_key)
-            raise ValueError(f"LLM provider '{provider_key}' not found in config")
+            raise ValueError(f"LLM provider '{provider_key}' not found in config. Use 'groq' or 'vllm'.")
 
         llm_config = llm_block[provider_key]
         provider = llm_config.get("provider")
@@ -98,12 +107,26 @@ class ModelLoader:
         if provider == "groq":
             return ChatGroq(
                 model=model_name,
-                api_key=self.api_key_mgr.get("GROQ_API_KEY"), #type: ignore
+                api_key=self.api_key_mgr.get("GROQ_API_KEY"),
                 temperature=temperature,
             )
 
+        if provider == "vllm":
+            # vLLM serves OpenAI-compatible API, use ChatOpenAI with custom base_url
+            # Allow base_url override via env var for flexibility
+            base_url = os.getenv("VLLM_BASE_URL", llm_config.get("base_url", "http://localhost:8000/v1"))
+            api_key = self.api_key_mgr.api_keys.get("VLLM_API_KEY", "EMPTY")
+            log.info("Using vLLM endpoint", base_url=base_url)
+            return ChatOpenAI(
+                model=model_name,
+                base_url=base_url,
+                api_key=api_key,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+
         log.error("Unsupported LLM provider", provider=provider)
-        raise ValueError(f"Unsupported LLM provider: {provider}. Use 'groq'.")
+        raise ValueError(f"Unsupported LLM provider: {provider}. Use 'groq' or 'vllm'.")
 
 
 if __name__ == "__main__":
