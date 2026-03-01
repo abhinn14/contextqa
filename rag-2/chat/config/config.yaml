@@ -21,7 +21,7 @@ llm:
 
   vllm:
     provider: "vllm"
-    model_name: "gpt-oss-20b"  # Your vLLM model on RunPod
+    model_name: "openai/gpt-oss-20b"  # Your vLLM model on RunPod
     base_url: "http://localhost:8000/v1"  # Override with VLLM_BASE_URL env var
     temperature: 0
     max_output_tokens: 2048

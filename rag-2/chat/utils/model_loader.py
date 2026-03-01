@@ -115,6 +115,9 @@ class ModelLoader:
             # vLLM serves OpenAI-compatible API, use ChatOpenAI with custom base_url
             # Allow base_url override via env var for flexibility
             base_url = os.getenv("VLLM_BASE_URL", llm_config.get("base_url", "http://localhost:8000/v1"))
+            # Ensure base_url ends with /v1 for OpenAI-compatible API
+            if not base_url.rstrip("/").endswith("/v1"):
+                base_url = base_url.rstrip("/") + "/v1"
             api_key = self.api_key_mgr.api_keys.get("VLLM_API_KEY", "EMPTY")
             log.info("Using vLLM endpoint", base_url=base_url)
             return ChatOpenAI(
